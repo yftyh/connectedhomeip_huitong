@@ -16,6 +16,12 @@
  *    limitations under the License.
  */
 
+/*
+ *   1.初始化，电机默认为 Open 状态
+ *   2.通过回调函数调用 OnStateChanged() 修改电机状态
+ *   3.调用 setstate() 直接修改电机状态
+ */
+
 #include "ContactSensorManager.h"
 
 #include "AppConfig.h"
@@ -23,7 +29,7 @@
 
 #include <lib/support/CodeUtils.h>
 
-//#include <zephyr/drivers/pwm.h>
+// #include <zephyr/drivers/pwm.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
@@ -88,11 +94,11 @@ void ContactSensorManager::HandleAction(AppEvent * aEvent)
 
 void ContactSensorManager::setstate(State astatus)
 {
-    if(astatus == State::kContactOpened)
+    if (astatus == State::kContactOpened)
     {
         sContactSensor.mState = State::kContactOpened;
     }
-    else if(astatus == State::kContactClosed)
+    else if (astatus == State::kContactClosed)
     {
         sContactSensor.mState = State::kContactClosed;
     }
@@ -100,7 +106,7 @@ void ContactSensorManager::setstate(State astatus)
     {
         LOG_ERR("set error status.");
     }
-    
+
     if (sContactSensor.mCallbackStateChanged != nullptr)
     {
         sContactSensor.mCallbackStateChanged(sContactSensor.mState);

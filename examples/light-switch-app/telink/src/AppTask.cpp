@@ -30,7 +30,7 @@ LOG_MODULE_DECLARE(app, CONFIG_CHIP_APP_LOG_LEVEL);
 AppTask AppTask::sAppTask;
 
 const struct gpio_dt_spec sFactoryResetButtonDt = GPIO_DT_SPEC_GET(DT_NODELABEL(key_switch), gpios);
-MotorWidget sStatusMotor;
+// MotorWidget sStatusMotor;
 bool direction    = false;
 bool switch_state = false;
 static k_timer mButtonReleaseCheckTimer;
@@ -52,19 +52,16 @@ CHIP_ERROR AppTask::Init(void)
 
     // Init motor control
     MotorWidget::SetCallback(MotorStateUpdateHandler, MotorStopHandler);
-    sStatusMotor.Init();
+    // sStatusMotor.Init();
+    MotorWidgetInst().Init();
     UpdateMotor();
 
     ContactSensorMgr().Init();
     ContactSensorMgr().SetCallback(OnStateChanged);
 
-    // sStatusMotor.Start(false);
-    // k_sleep(K_MSEC(2250));
-    // sStatusMotor.Start(true);
-    // sStatusMotor.Restart();
-
     // 获得上电时开关的状态(On/Off)
-    if (!sStatusMotor.GetMotorState())
+    // if (!sStatusMotor.GetMotorState())
+    if (!MotorWidgetInst().GetMotorState())
     {
         ContactSensorMgr().setstate(ContactSensorManager::State::kContactOpened);
     }
@@ -137,7 +134,8 @@ void AppTask::UpdateMotorEventHandler(AppEvent * aEvent)
 
 void AppTask::UpdateMotor()
 {
-    sStatusMotor.MotorStop();
+    // sStatusMotor.MotorStop();
+    MotorWidgetInst().MotorStop();
 }
 
 void AppTask::FactoryResetEventHandler(AppEvent * aEvent)
@@ -152,7 +150,8 @@ void AppTask::FactoryResetEventHandler(AppEvent * aEvent)
         {
             switch_state = false;
         }
-        sStatusMotor.Start(switch_state);
+        // sStatusMotor.Start(switch_state);
+        MotorWidgetInst().Start(switch_state);
     }
 }
 
@@ -175,7 +174,7 @@ void AppTask::buttonReleaseCheckTimerHandler(k_timer * timer)
 
 void AppTask::buttonReleaseCheckEventHandler(AppEvent * aEvent)
 {
-    if (MotorWidget::sInstance.isMotorStop == false)
+    if (MotorWidgetInst().isMotorStop == false)
     {
         LOG_INF("AppTask ----> sInstance.isMotorStop == false");
         return;
@@ -247,13 +246,15 @@ void AppTask::OnStateChanged(ContactSensorManager::State aState)
     {
         LOG_INF("Switch state changed to On");
         // sContactSensorLED.Set(true);
-        sStatusMotor.Start(true);
+        // sStatusMotor.Start(true);
+        MotorWidgetInst().Start(true);
     }
     else if (ContactSensorManager::State::kContactOpened == aState)
     {
         LOG_INF("Switch state changed to Off");
         // sContactSensorLED.Set(false);
-        sStatusMotor.Start(false);
+        // sStatusMotor.Start(false);
+        MotorWidgetInst().Start(false);
     }
 
     if (sAppTask.IsSyncClusterToButtonAction())
